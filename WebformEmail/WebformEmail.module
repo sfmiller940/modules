@@ -1,0 +1,77 @@
+<?php
+
+/**
+ * If user opts in, then send confirmation email with unsubscribe link.
+ */
+
+/**
+ * Hook for when webform is submitted.
+ */
+function WebformEmail_webform_submission_insert($node, $submission) {
+
+	//Record log.
+	watchdog('WebformEmail', '<pre>'. print_r($submission , TRUE) .'</pre>');
+	
+	//Check that we're on the right webform node and they want a confirmation email.
+	if ( $submission->nid == 108 && $submission->data[11]['value'][0]=='1'){ WebformEmail_mail_send($submission); }
+
+}
+
+// Main function for sending email.
+function WebformEmail_mail_send($submission){
+
+		// Get data from the form.
+		$fname = $submission->data[1]['value'][0];
+		$lname = $submission->data[2]['value'][0];
+		$clubnum = $submission->data[3]['value'][0];	
+		$email = $submission->data[4]['value'][0];
+		$addie1 = $submission->data[5]['value'][0];
+		$addie2 = $submission->data[6]['value'][0];
+		$city = $submission->data[7]['value'][0];
+		$state = $submission->data[8]['value'][0];
+		$zip = $submission->data[9]['value'][0];
+		
+		
+		/**
+		 *  SETTINGS FOR CONFIRMATION EMAIL
+		*/
+		$from = 'email@url.com';
+		$subject='Webform Confirmation Entry';
+
+
+		//Email message is HTML between EMAILs.
+		$message = <<<"EMAIL"
+<html><head>
+<title>Thanks for Your Webform</title>
+</head>
+<body>
+		
+		Thanks!
+		
+</body></html>
+EMAIL;
+		
+		
+		// Send Confirmation email.
+		$params = array(
+		  'subject' => t($subject),
+		  'body' => t($message),
+		);
+		drupal_mail('WebformEmail', 'notice', $email, 'en', $params, $from, TRUE);
+
+}
+
+// Send email Function
+function WebformEmail_mail($key, &$message, $params) {
+    $message['subject'] = $params['subject'];
+    $message['body'][] = $params['body']; 
+	$headers = array(
+		'MIME-Version' => '1.0',
+		'Content-Type' => 'text/html; charset=UTF-8;',
+		'Content-Transfer-Encoding' => '8Bit',
+		'X-Mailer' => 'Drupal'
+	  );
+  foreach ($headers as $key => $value) {
+	$message['headers'][$key] = $value;
+	}
+}

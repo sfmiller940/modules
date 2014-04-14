@@ -1,0 +1,5 @@
+name = Webform Email
+description = Sends confirmation email for Webforms.
+core = 7.x
+package = Webform
+dependencies[] = webform
