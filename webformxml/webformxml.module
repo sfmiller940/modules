@@ -1,0 +1,46 @@
+<?php
+
+/**
+ * 
+ * Send user info via XML post request when form is submitted.
+ */
+
+/**
+ * Submit handler for Webform ID #57.
+ */
+function webformxml_webform_submission_insert($node, $submission) {
+
+	//Check that we're on the right webform.
+	if ( $submission->nid == 57 ){
+		
+		//Create XML string.
+		$xml_str = "<RequestData xmlns='http://www.w3.org/1999/xhtml'>";
+		$xml_str .= "<details>|". $submission->data[2]['value'][0]. " [".$submission->data[4]['value'][0]."]|";
+		$xml_str .= $submission->data[3]['value'][0]."|".$submission->data[16]['value'][0]."|". $sex ."|";
+		$xml_str .= $submission->data[1]['value'][0]."|".$submission->sid."|PP|";
+		$xml_str .= "HOME|".$submission->data[17]['value'][0]."|Y|MOBILE|".$submission->data[18]['value'][0]."|N|";
+		$xml_str .= $submission->data[7]['value'][0]."|".$submission->data[8]['value'][0]."|";
+		$xml_str .= $submission->data[9]['value'][0]."|".$submission->data[10]['value'][0]."|".$submission->data[12]['value'][0]."|Webform Submission|</details>";
+		$xml_str .= "</RequestData>";
+		
+		//Send XML via HTTP.
+		$url = 'http://url.com/newacct';
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/xml'));
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, "$xml_str");
+		$content=curl_exec($ch);
+
+		//Make a log of it.
+		watchdog('XML Query', '<pre>'. print_r($submission , TRUE) .'</pre>');
+		watchdog('XML Query', '<pre>'. $xml_str.'</pre>');
+		watchdog('XML Query', '<pre>'. $content.'</pre>');
+
+		}		
+
+}
+
+

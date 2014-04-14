@@ -1,0 +1,5 @@
+name = Post XML from Webform
+description = Sends an xml post for each new webform entry.
+core = 7.x
+package = Webform
+dependencies[] = webform
