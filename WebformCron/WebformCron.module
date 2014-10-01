@@ -1,0 +1,29 @@
+<?php
+
+// via https://www.drupal.org/node/1907530
+
+function WebformCron_cron() {
+  // Only run in the wee hours of the morn
+  if (date('A') == 'AM' && date('g') < 4) {
+    // Find out the last time cron ran
+    $cron_last = db_result(db_query('SELECT timestamp FROM {watchdog} WHERE type = "cron" ORDER BY timestamp DESC LIMIT 1'));
+    // Find out if its we need to run it yet today
+    $run_today = (date('ymd', $cron_last) != date('ymd')) ? TRUE : FALSE;
+    if ($run_today) {
+      // Get the submissions older than 6 months
+      $delete_before = strtotime('-6 months');
+      $submissions = db_query('SELECT * FROM  {webform_submissions} WHERE submitted < %d ORDER BY nid DESC', $delete_before);
+      $deleted = 0;
+      // Loop through and delete them
+      while ($row = db_fetch_array($submissions)) {
+        $node = node_load($row['nid']);
+        $submission = webform_menu_submission_load($row['sid'], $row['nid']);
+        webform_submission_delete($node, $submission);
+        $deleted ++;
+      }
+      watchdog('MYMODULE', 'Deleted %total old webform submissions.', array('%total' => $deleted));
+    }
+  }
+}
+
+?>
